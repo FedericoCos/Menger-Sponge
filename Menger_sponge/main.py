@@ -2,15 +2,16 @@ import pygame as pg
 from pygame.locals import *
 import sys
 from Cube import *
+from math import cos, sin
 
 
 # global variables
-WIDTH = 1260
+WIDTH = 1280
 HEIGHT = 900
 FPS = 30
 BLACK = (0, 0, 0)
 
-SCALE = 486
+SCALE = 500
 SCALE_HALF = SCALE / 2
 
 
