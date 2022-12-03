@@ -1,7 +1,7 @@
 import numpy as np
 import pygame as pg
-from math import cos, sin
 from random import choices
+import numba
 
 WHITE = (255, 255, 255)
 COLORS = [(255, 255, 255), (255, 255, 0), (255, 0, 0), (0, 255, 255), (0, 0, 255), (255, 0, 255), (0, 255, 0)]
@@ -14,6 +14,15 @@ projection_matrix = np.matrix([
 
 def connect_points(surface, i, j, p):
     pg.draw.line(surface, WHITE, (p[i][0], p[i][1]), (p[j][0], p[j][1]))
+
+
+@numba.jit(nopython=True)
+def get_proj(rot_x, rot_y, rot_z, point):
+    rotz = np.dot(rot_z, point.reshape((3, 1)))
+    roty = np.dot(rot_y, rotz)
+    rotx = np.dot(rot_x, roty)
+
+    return np.dot(projection_matrix, rotx)
 
 
 class Cube:
@@ -65,11 +74,8 @@ class Cube:
     def draw(self, surface, rotation_x, rotation_y, rotation_z):
         i = 0
         for point in self.points:
-            rotz = np.dot(rotation_z, point.reshape((3, 1)))
-            roty = np.dot(rotation_y, rotz)
-            rotx = np.dot(rotation_x, roty)
 
-            projected2d = np.dot(projection_matrix, rotx)
+            projected2d = get_proj(rotation_x, rotation_y, rotation_z, point)
             x = int(projected2d[0][0]) + self.centerx
             y = int(projected2d[1][0]) + self.centery
 
@@ -82,3 +88,4 @@ class Cube:
             connect_points(surface, p, (p+1) % 4, self.projected_points)
             connect_points(surface, p+4, ((p+1) % 4) + 4, self.projected_points)
             connect_points(surface, p, (p+4), self.projected_points)
+
